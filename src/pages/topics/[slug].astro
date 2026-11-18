@@ -1,0 +1,15 @@
+---
+import Base from '../../layouts/Base.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { categories } from '../../lib/categories';
+import { publishedArticles } from '../../lib/articles';
+export function getStaticPaths(){ return categories.map(category=>({params:{slug:category.slug},props:{category}})); }
+const {category}=Astro.props;
+const articles=(await publishedArticles()).filter(a=>a.data.category===category.slug);
+---
+<Base title={`${category.name} | newZgen`} description={category.description}>
+  <section class="hero"><div class="wrap"><div class="eyebrow">Explore / {category.name}</div><h1>{category.name}</h1><p>{category.description}</p></div></section>
+  <div class="wrap"><div class="section-head"><h2 class="section-title">Latest in {category.name}</h2></div>
+  {articles.length?<div class="grid">{articles.map(article=><ArticleCard article={article}/>)}</div>:<section class="empty"><h2>No published stories yet.</h2><p>Check back after our editors publish the first {category.name.toLowerCase()} article.</p></section>}
+  </div>
+</Base>

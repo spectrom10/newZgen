@@ -1,0 +1,7 @@
+---
+import Base from '../../layouts/Base.astro';
+import PaperHome from '../../components/PaperHome.astro';
+import { publishedArticles } from '../../lib/articles';
+const articles=await publishedArticles();
+---
+<Base title="Paper Design Preview | newZgen" description="Contemporary editorial design preview for newZgen." canonicalPath="/preview/paper"><PaperHome articles={articles}/></Base>

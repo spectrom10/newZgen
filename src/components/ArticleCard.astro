@@ -1,0 +1,12 @@
+---
+import type { Article } from '../lib/articles';
+import { articlePath, readingTime, categoryName, dateLabel } from '../lib/articles';
+const { article, featured=false } = Astro.props as {article:Article,featured?:boolean};
+---
+<article class:list={['story-card',{featured}]}>
+  {article.data.cover && <a href={articlePath(article)}><img class="story-image" src={article.data.cover} alt={article.data.coverAlt ?? ''} loading="lazy" /></a>}
+  <div class="eyebrow">{categoryName(article.data.category)}</div>
+  <h2><a href={articlePath(article)}>{article.data.title}</a></h2>
+  <p>{article.data.description}</p>
+  <span class="meta">By {article.data.author} · {dateLabel(article.data.publishedAt)} · {readingTime(article)} min read</span>
+</article>

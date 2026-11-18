@@ -1,0 +1,45 @@
+---
+import Base from '../../layouts/Base.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import { render } from 'astro:content';
+import { publishedArticles, categoryName, dateLabel, articlePath, readingTime, relatedArticles } from '../../lib/articles';
+export async function getStaticPaths() {
+  const articles = await publishedArticles();
+  return articles.map(article => ({ params:{slug:article.id}, props:{article, all:articles} }));
+}
+const { article, all } = Astro.props;
+const { Content } = await render(article);
+const related = relatedArticles(article,all);
+const canonical = new URL(articlePath(article), Astro.site ?? Astro.url.origin).toString();
+const schema = {
+  '@context':'https://schema.org','@type':'NewsArticle',headline:article.data.title,
+  description:article.data.description,datePublished:article.data.publishedAt.toISOString(),
+  ...(article.data.updatedAt && {dateModified:article.data.updatedAt.toISOString()}),
+  author:{'@type':'Person',name:article.data.author},
+  publisher:{'@type':'Organization',name:'newZgen'},mainEntityOfPage:canonical,
+  ...(article.data.cover && {image:[new URL(article.data.cover,Astro.site ?? Astro.url.origin).toString()]}),
+};
+---
+<Base title={`${article.data.title} | newZgen`} description={article.data.description} image={article.data.cover} canonicalPath={articlePath(article)}>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  <article class="article">
+    <a class="eyebrow" href={`/topics/${article.data.category}`}>{categoryName(article.data.category)}</a>
+    <h1>{article.data.title}</h1>
+    <p class="dek">{article.data.description}</p>
+    <div class="article-meta">By {article.data.author} · {dateLabel(article.data.publishedAt)} · {readingTime(article)} min read</div>
+    {article.data.cover && <figure class="cover"><img src={article.data.cover} alt={article.data.coverAlt ?? ''} /><figcaption>{article.data.coverAlt}</figcaption></figure>}
+    <div class="prose"><Content /></div>
+    <aside class="impact"><h2>What this means for you</h2><p>{article.data.whatItMeansForYou}</p></aside>
+    {article.data.sources.length > 0 && <section class="sources"><h2>Sources</h2><ol>{article.data.sources.map(s=><li><a class="inline" href={s.url} target="_blank" rel="noopener noreferrer">{s.label}</a></li>)}</ol></section>}
+    <div style="margin-top:2rem"><button class="share-btn" id="share-article" data-title={article.data.title} data-url={canonical}>Share this story</button></div>
+  </article>
+  {related.length>0 && <section class="wrap"><div class="section-head"><h2 class="section-title">Keep reading</h2></div><div class="grid">{related.map(a=><ArticleCard article={a}/>)}</div></section>}
+  <script>
+    document.querySelector<HTMLButtonElement>('#share-article')?.addEventListener('click',async(event)=>{
+      const el=event.currentTarget as HTMLButtonElement;
+      const data={title:el.dataset.title||document.title,url:el.dataset.url||window.location.href};
+      if(navigator.share){try{await navigator.share(data);return}catch{return}}
+      try{await navigator.clipboard.writeText(data.url);el.textContent='Link copied'}catch{window.prompt('Copy article link',data.url)}
+    });
+  </script>
+</Base>

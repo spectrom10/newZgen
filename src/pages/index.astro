@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import CityHome from '../components/CityHome.astro';
+import PaperHome from '../components/PaperHome.astro';
+import { publishedArticles } from '../lib/articles';
+import { siteSettings } from '../lib/site';
+const articles=await publishedArticles();
+const selected=siteSettings.homepageDesign;
+---
+<Base title="newZgen — The news behind the news">
+{selected==='city' ? <CityHome articles={articles}/> : selected==='paper' ? <PaperHome articles={articles}/> : <div class="choose-experience"><div class="wrap choose-intro"><span class="choice-eyebrow">newZgen / ART DIRECTION STUDY</span><h1>One newsroom.<br/><em>Two worlds.</em></h1><p>Explore two complete homepage directions. Both pull from the same real published articles. This is a design review, not two separate websites.</p></div><div class="wrap choice-grid"><a class="choice-card choice-city" href="/preview/city"><div class="choice-art city-art"><span class="choice-topline">01 — THE CITY</span><div class="art-city-grid"><span class="art-slash"></span><span class="art-map-label">AV. DIAGONAL</span></div></div><div class="choice-copy"><span>THE EXPLORER</span><h2>Barcelona,<br/>reimagined.</h2><p>Interactive city-inspired topics, a signature Diagonal, and a playful way to connect the news.</p><strong>Explore city design ↗</strong></div></a><a class="choice-card choice-paper" href="/preview/paper"><div class="choice-art paper-art"><span class="choice-topline">02 — THE PAPER</span><div class="art-paper-title">THE BIGGER<br/>PICTURE<span>.</span></div><div class="art-paper-lines"><b></b><b></b><b></b></div></div><div class="choice-copy"><span>THE EDITION</span><h2>The newspaper,<br/>reinvented.</h2><p>Bold contemporary editorial type, dynamic article hierarchy, and personality without newsroom clichés.</p><strong>Explore paper design ↗</strong></div></a></div><div class="wrap choose-footer">Once the group chooses, change <code>homepageDesign</code> in <code>src/lib/site.ts</code> to <code>'city'</code> or <code>'paper'</code>. Both preview routes will still work.</div></div>}
+</Base>

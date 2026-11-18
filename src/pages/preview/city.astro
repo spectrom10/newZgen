@@ -1,0 +1,7 @@
+---
+import Base from '../../layouts/Base.astro';
+import CityHome from '../../components/CityHome.astro';
+import { publishedArticles } from '../../lib/articles';
+const articles=await publishedArticles();
+---
+<Base title="City Design Preview | newZgen" description="Barcelona-inspired design preview for newZgen." canonicalPath="/preview/city"><nav class="preview-switch" aria-label="Compare homepage designs"><span>DESIGN REVIEW</span><a aria-current="page" href="/preview/city">01 / City</a><a href="/preview/paper">02 / Paper</a><a href="/">Both options ↗</a></nav><CityHome articles={articles}/></Base>

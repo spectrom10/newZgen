@@ -1,0 +1,45 @@
+---
+import ArticleCard from './ArticleCard.astro';
+import type { Article } from '../lib/articles';
+import { articlePath, categoryName, readingTime } from '../lib/articles';
+import { categories } from '../lib/categories';
+import { siteSettings } from '../lib/site';
+const { articles=[] } = Astro.props as { articles?: Article[] };
+const [lead, ...more] = articles;
+---
+<div class="paper-experience paper-full-interface">
+  <header class="paper-internal-header wrap">
+    <div class="paper-internal-top"><span>INDEPENDENT NEWS FOR THE CURIOUS</span><a href="/preview/city">VIEW THE CITY CONCEPT ↗</a></div>
+    <div class="paper-internal-brand"><a href="/" aria-label="newZgen home">{siteSettings.brand.logoImage ? <img src={siteSettings.brand.logoImage} alt="newZgen"/> : <>new<span>Z</span>gen.</>}</a><span>THE NEWS BEHIND THE NEWS.</span></div>
+    <nav class="paper-internal-nav" aria-label="Newspaper navigation"><a href="/preview/paper" aria-current="page">Front page</a>{categories.map(c=><a href={`/topics/${c.slug}`}>{c.name}</a>)}<a href="/about">About</a></nav>
+  </header>
+  <section class="paper-masthead wrap" aria-labelledby="paper-heading">
+    <div class="paper-kicker"><span>AN INDEPENDENT LOOK AT THE WORLD</span><span>THE DAILY PERSPECTIVE</span></div>
+    <h1 id="paper-heading">The bigger picture<span class="paper-dot">.</span></h1>
+    <div class="paper-subrow"><span>THE NEWS BEHIND THE NEWS</span><span>Business · Economics · Culture · Everything in between</span></div>
+  </section>
+  <div class="wrap paper-edition">
+    <div class="paper-section-label"><span>FRONT PAGE</span><span>STORIES THAT CONNECT THE DOTS</span><span>01 — THE PAPER</span></div>
+    {lead ? (
+      <div class="paper-front-grid">
+        <article class="paper-lead">
+          <span class="paper-chip">{categoryName(lead.data.category)}</span>
+          <h2><a href={articlePath(lead)}>{lead.data.title}</a></h2>
+          <p class="paper-deck">{lead.data.description}</p>
+          {lead.data.cover && <a class="paper-cover-link" href={articlePath(lead)}><img src={lead.data.cover} alt={lead.data.coverAlt || ''} loading="eager" /></a>}
+          <div class="paper-meaning"><span class="paper-meaning-label">WHY IT MATTERS TO YOU</span><p>{lead.data.whatItMeansForYou}</p></div>
+          <a class="paper-read" href={articlePath(lead)}>Read the story <span aria-hidden="true">↗</span></a>
+        </article>
+        <div class="paper-side-stories">
+          {more.slice(0,3).map((article, i) => <article class="paper-side-story"><span class="paper-num">{String(i+2).padStart(2,'0')}</span><div><span class="paper-chip">{categoryName(article.data.category)} · {readingTime(article)} MIN</span><h3><a href={articlePath(article)}>{article.data.title}</a></h3><p>{article.data.description}</p><a class="paper-read" href={articlePath(article)}>Full story ↗</a></div></article>)}
+          {more.length===0 && <div class="paper-side-empty"><span class="paper-sunburst" aria-hidden="true">✳</span><h3>Space for the next big story.</h3><p>When the editorial team publishes new articles, this front page rearranges itself automatically.</p></div>}
+        </div>
+      </div>
+    ) : (
+      <div class="paper-before-launch"><div class="paper-before-mark" aria-hidden="true">✳</div><div><span class="paper-chip">THE FIRST EDITION IS COMING</span><h2>A fresh perspective starts here.</h2><p>No placeholder news stories. Once your team publishes its first article, the real headline and its personal-impact analysis automatically appear here.</p><span class="paper-note">The template is ready. The newsroom is yours.</span></div></div>
+    )}
+    {more.length>3 && <section class="paper-more"><div class="paper-section-label"><span>MORE TO THE STORY</span><span>FRESH PERSPECTIVES</span></div><div class="paper-more-grid">{more.slice(3).map(article=><ArticleCard article={article}/>)}</div></section>}
+    <section class="paper-topics"><div><span class="paper-chip">YOUR WORLD, UNPACKED</span><h2>Pick a subject.<br/><em>Get the context.</em></h2></div><nav aria-label="Browse all subjects" class="paper-topic-list">{categories.map((category,i)=><a href={`/topics/${category.slug}`}><span>{String(i+1).padStart(2,'0')}</span><strong>{category.name}</strong><span aria-hidden="true">↗</span></a>)}</nav></section>
+  </div>
+  <footer class="paper-internal-footer wrap"><strong>new<span>Z</span>gen.</strong><span>The news behind the news. © {new Date().getFullYear()}</span><a href="/preview/city">See the City design ↗</a></footer>
+</div>

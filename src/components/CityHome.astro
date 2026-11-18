@@ -1,0 +1,72 @@
+---
+import type { Article } from '../lib/articles';
+import { categories } from '../lib/categories';
+import { articlePath } from '../lib/articles';
+const { articles=[] } = Astro.props as { articles?: Article[] };
+// These are editorial topic territories, not administrative district boundaries.
+// Data and the reader-facing routes are shared with the newspaper homepage.
+const zones = [
+ {slug:'business',place:'Les Corts',x:180,y:349,path:'M92 285 L312 255 L325 390 L92 485Z'},
+ {slug:'economics',place:'Eixample',x:457,y:346,path:'M312 260 L607 225 L638 446 L325 390Z'},
+ {slug:'culture',place:'Gràcia',x:494,y:158,path:'M315 105 L585 70 L607 225 L312 260Z'},
+ {slug:'science-health',place:'Horta',x:752,y:137,path:'M585 70 L845 120 L925 230 L607 225Z'},
+ {slug:'technology',place:'Poblenou',x:854,y:379,path:'M638 285 L925 230 L1002 460 L746 510 L638 446Z'},
+ {slug:'politics',place:'Ciutat Vella',x:600,y:521,path:'M325 390 L638 446 L746 510 L605 612 L377 569Z'},
+ {slug:'sports',place:'Camp Nou',x:200,y:563,path:'M92 485 L325 390 L377 569 L245 626 L99 595Z'},
+ {slug:'life',place:'Zona Universitària',x:412,y:589,path:'M245 626 L377 569 L605 612 L520 665 L315 665Z'}
+].map((z,i)=>({...z,index:i+1, category:categories.find(c=>c.slug===z.slug)!,latest:articles.find(a=>a.data.category===z.slug)}));
+---
+<div class="city-experience city-rebuilt">
+  <section class="city-intro wrap">
+    <div><span class="city-kicker">A CITY OF STORIES</span><h1>Everything<br/><span>connects.</span></h1></div>
+    <div class="city-intro-side"><span>01 / EXPLORE BARCELONA</span><p>Tap a part of the city to explore a subject. Follow Diagonal to see how the stories connect.</p></div>
+  </section>
+  <section class="wrap city-map-wrap" aria-label="Interactive Barcelona-inspired news map">
+    <div class="city-map-frame">
+      <div class="city-map-top"><span>newZgen / CITY EDITION</span><span>ONE CITY. EIGHT PERSPECTIVES.</span></div>
+      <div class="city-map-stage">
+        <svg class="city-territory-map" viewBox="0 0 1100 720" role="group" aria-labelledby="city-map-title city-map-desc" preserveAspectRatio="xMidYMid meet">
+          <title id="city-map-title">Explore stories through Barcelona</title>
+          <desc id="city-map-desc">An editorial interpretation of Barcelona, with eight selectable topic areas. Avinguda Diagonal connects the map.</desc>
+          <defs>
+            <clipPath id="territory-outline"><path d="M89 284 L165 152 L315 105 L585 70 L845 120 L925 230 L1002 460 L861 565 L605 612 L520 665 L315 665 L99 595 Z"/></clipPath>
+            <pattern id="city-eixample" width="47" height="47" patternUnits="userSpaceOnUse" patternTransform="rotate(-4)"><path d="M2 2 H45 V45 H2 Z" fill="none" stroke="var(--city-grid-stroke)" stroke-width="1.1"/></pattern>
+          </defs>
+          <path class="city-map-silhouette" d="M89 284 L165 152 L315 105 L585 70 L845 120 L925 230 L1002 460 L861 565 L605 612 L520 665 L315 665 L99 595 Z"/>
+          {zones.map(z=><a class="city-zone-link" href={`/topics/${z.slug}`} data-category={z.category.name} data-headline={z.latest?.data.title || z.category.description} data-location={z.place} data-story={z.latest ? articlePath(z.latest) : ''} aria-label={`${z.category.name}: ${z.place}. ${z.latest?.data.title || 'Explore this topic'}`}>
+            <path class="city-zone-shape" d={z.path}/>
+            <g class="city-zone-label" transform={`translate(${z.x} ${z.y})`}>
+              <rect x="-94" y="-30" width="188" height="60" rx="9"/>
+              <text class="city-zone-topic" y="-3" text-anchor="middle">{z.category.name}</text>
+              <text class="city-zone-neighborhood" y="18" text-anchor="middle">{z.place}</text>
+            </g>
+          </a>)}
+          <path d="M89 284 L165 152 L315 105 L585 70 L845 120 L925 230 L1002 460 L861 565 L605 612 L520 665 L315 665 L99 595 Z" class="city-border"/>
+          <path d="M80 577 C340 490 600 370 984 172" class="city-diagonal-halo"/>
+          <path id="diagonal-path" d="M80 577 C340 490 600 370 984 172" class="city-diagonal-road"/>
+          <text class="city-diagonal-text" dy="-16"><textPath href="#diagonal-path" startOffset="29%">AVINGUDA DIAGONAL · WHAT CONNECTS</textPath></text>
+        </svg>
+        <div class="city-live-preview" aria-live="polite"><span class="city-live-eyebrow">SELECT A NEIGHBOURHOOD ↗</span><strong id="city-preview-title">The news behind the news.</strong><p id="city-preview-detail">Hover, focus or tap a labeled area of the map. All eight areas are clickable.</p><a id="city-preview-story" href="/" hidden>Read latest story ↗</a></div>
+      </div>
+      <div class="city-map-bottom"><span>BARCELONA-INSPIRED EDITORIAL MAP · NOT GEOGRAPHIC BOUNDARIES</span><span>DIAGONAL CONNECTS THE DOTS</span></div>
+    </div>
+  </section>
+  <section class="wrap city-categories"><div class="city-categories-heading"><span class="city-kicker">PREFER A LIST?</span><h2>Choose your<br/><em>angle.</em></h2><p>The same subjects, the same real articles. No made-up headlines.</p></div><div class="city-category-list">{zones.map((z)=><a href={`/topics/${z.slug}`} class="city-category-row"><span class="city-category-num">{String(z.index).padStart(2,'0')}</span><span class="city-category-text"><strong>{z.category.name}</strong><small>{z.latest ? z.latest.data.title : z.category.description}</small></span><span class="city-category-arrow">↗</span></a>)}</div></section>
+</div>
+<script>
+  const previewTitle=document.querySelector<HTMLElement>('#city-preview-title');
+  const previewDetail=document.querySelector<HTMLElement>('#city-preview-detail');
+  const storyLink=document.querySelector<HTMLAnchorElement>('#city-preview-story');
+  document.querySelectorAll<SVGAElement>('.city-zone-link').forEach(zone=>{
+    const show=()=>{
+      if (!previewTitle || !previewDetail || !storyLink) return;
+      previewTitle.textContent=zone.dataset.category || 'Explore';
+      previewDetail.textContent=`${zone.dataset.location || 'Barcelona'} · ${zone.dataset.headline || 'Explore this subject'}`;
+      if(zone.dataset.story){storyLink.href=zone.dataset.story; storyLink.hidden=false;}else{storyLink.hidden=true;}
+      document.querySelectorAll('.city-zone-link').forEach(el=>el.classList.toggle('is-selected',el===zone));
+    };
+    zone.addEventListener('mouseenter',show);
+    zone.addEventListener('focus',show);
+    zone.addEventListener('touchstart',show,{passive:true});
+  });
+</script>
